@@ -1,27 +1,47 @@
-import time
+from queue import Queue, Empty
+from pathlib import Path
+from typing import Generator, Optional
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from pathlib import Path
-downloads_path = Path.home() / "Downloads"
 
-class NewFileHandler(FileSystemEventHandler):
+
+class _NewFileHandler(FileSystemEventHandler):
+    def __init__(self, queue: Queue):
+        super().__init__()
+        self.queue = queue
+
     def on_created(self, event):
         if not event.is_directory:
-            print(f"New file detected: {event.src_path}")
+            self.queue.put(Path(event.src_path))
 
-if __name__ == "__main__":
-    path_to_watch = downloads_path
-    
-    event_handler = NewFileHandler()
+
+def watch_downloads(
+    path: Optional[Path] = None,
+    poll_interval: float = 0.5,
+) -> Generator[Path, None, None]:
+    """
+    Yields the Path object of each newly detected file as soon as it is created.
+
+    :param path: Path object or string of the directory to watch. Defaults to ~/Downloads.
+    :param poll_interval: Timeout in seconds for checking events (allows clean exit on Ctrl+C).
+    """
+    target_path = Path(path) if path else (Path.home() / "Downloads")
+    file_queue: Queue = Queue()
+
+    handler = _NewFileHandler(file_queue)
     observer = Observer()
-    observer.schedule(event_handler, path=path_to_watch, recursive=False)
-    
-    print(f"Monitoring folder: {path_to_watch}...")
+    observer.schedule(handler, path=str(target_path), recursive=False)
     observer.start()
-    
+
     try:
         while True:
-            time.sleep(1)
+            try:
+                file_path = file_queue.get(timeout=poll_interval)
+                yield file_path
+            except Empty:
+                continue
     except KeyboardInterrupt:
+        pass
+    finally:
         observer.stop()
-    observer.join()
+        observer.join()
