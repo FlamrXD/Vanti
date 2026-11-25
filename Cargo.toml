@@ -9,3 +9,15 @@ hex = "0.4"
 notify = "9.0.0"
 dirs = "7.0.0"
 reqwest = { version = "0.12", features = ["blocking"] }
+slint = "1.19.0"
+notify-rust = "4.11"
+tray-icon = "0.19"
+tao = "0.30"
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[build-dependencies]
+slint-build = "1.19.0"
+
+[profile.release]
+codegen-units = 1
+lto = true
