@@ -1,0 +1,31 @@
+name: Automatic Mirror
+
+on:
+  # Runs automatically every 6 hours (adjust cron schedule as needed)
+  schedule:
+    - cron: '*/5 * * * *'
+  
+  # Allows you to trigger it manually from the "Actions" tab anytime
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push mirror to GitHub
+        run: |
+          git remote add source https://git.inet-tech.net/iNet/Vanti.git
+          git fetch source --prune
+          git config --global user.name "GitHub Action Mirror"
+          git config --global user.email "action@github.com"
+          
+          # Push all branches and tags using the built-in GITHUB_TOKEN
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FlamrXD/Vanti.git --all --force
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FlamrXD/Vanti.git --tags --force
