@@ -6,10 +6,11 @@ use std::path::Path;
 use std::thread;
 use std::time::Duration;
 
-const HASH_URLS: [&str; 3] = [
+const HASH_URLS: [&str; 4] = [
     "https://raw.githubusercontent.com/amitambekar510/Malicious-Hash-Threat-List/refs/heads/main/hashes/sha256/malicious_SHA256_hashes_aa.txt",
     "https://raw.githubusercontent.com/amitambekar510/Malicious-Hash-Threat-List/refs/heads/main/hashes/sha256/malicious_SHA256_hashes_ab.txt",
     "https://raw.githubusercontent.com/amitambekar510/Malicious-Hash-Threat-List/refs/heads/main/hashes/sha256/malicious_SHA256_hashes_ac.txt",
+    "https://git.inet-tech.net/iNet/Vanti/raw/branch/main/hashes/test_hashes.txt"
 ];
 
 pub fn download_and_load_hashes() -> Result<HashSet<String>, Box<dyn std::error::Error>> {
